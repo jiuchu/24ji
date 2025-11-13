@@ -370,23 +370,43 @@
 
         // 获取真实预约API数据
         // 在现有的 fetchReservationData 函数中添加新的数据获取逻辑
+        // 修改 fetchReservationData 函数，使用新的代理优先级
         async function fetchReservationData() {
             loading.style.display = 'block';
             errorMessage.style.display = 'none';
             refreshBtn.disabled = true;
 
+            // 定义代理服务器列表，按优先级排序
+            const proxyServers = [
+                'https://api.codetabs.com/v1/proxy?quest=',  // 优先使用这个更稳定的代理
+                'https://api.allorigins.win/raw?url='        // 备用代理
+            ];
+
             try {
-                // 使用代理服务器解决跨域问题
-                const proxyUrl = 'https://api.allorigins.win/raw?url=';
-                const targetUrl = encodeURIComponent('https://v.youku.com/v_show/id_XNjQ4NDA3MTk3Ng==.html?spm=a2hkm.8166622.PhoneSokuProgram_1.dtitle&s=beecc45b903b4ea9b19a');
+                let html = null;
+                let success = false;
 
-                const response = await fetch(proxyUrl + targetUrl);
+                // 依次尝试不同的代理服务器
+                for (const proxyUrl of proxyServers) {
+                    try {
+                        const targetUrl = encodeURIComponent('https://v.youku.com/v_show/id_XNjQ4NDA3MTk3Ng==.html?spm=a2hkm.8166622.PhoneSokuProgram_1.dtitle&s=beecc45b903b4ea9b19a');
+                        const response = await fetch(proxyUrl + targetUrl);
 
-                if (!response.ok) {
-                    throw new Error(`HTTP错误! 状态: ${response.status}`);
+                        if (response.ok) {
+                            html = await response.text();
+                            success = true;
+                            console.log(`成功使用代理: ${proxyUrl}`);
+                            break;
+                        }
+                    } catch (proxyError) {
+                        console.log(`代理 ${proxyUrl} 失败，尝试下一个代理`);
+                        continue;
+                    }
                 }
 
-                const html = await response.text();
+                if (!success) {
+                    throw new Error('所有代理服务器都不可用');
+                }
 
                 // 提取预约人数
                 const reservationMatch = html.match(/"reservationPeopleNum":(\d+)/);
@@ -403,7 +423,6 @@
 
                 // 设置预约标题
                 setPublishTime(html);
-
 
             } catch (error) {
                 console.error('获取数据失败:', error);
@@ -442,23 +461,43 @@
 
 // 获取热度数据（修正后的唯一版本）
         // 修改 fetchHeatData 函数以正确提取热度数据
+        // 修改 fetchHeatData 函数，使用相同的代理优先级
         async function fetchHeatData() {
             loading.style.display = 'block';
             errorMessage.style.display = 'none';
             refreshBtn.disabled = true;
 
+            // 使用相同的代理服务器列表
+            const proxyServers = [
+                'https://api.codetabs.com/v1/proxy?quest=',
+                'https://api.allorigins.win/raw?url='
+            ];
+
             try {
-                // 使用代理服务器解决跨域问题
-                const proxyUrl = 'https://api.allorigins.win/raw?url=';
-                const targetUrl = encodeURIComponent('https://v.youku.com/v_show/id_XNjQ4NDA3MTk3Ng==.html?spm=a2hkm.8166622.PhoneSokuProgram_1.dtitle&s=beecc45b903b4ea9b19a');
+                let html = null;
+                let success = false;
 
-                const response = await fetch(proxyUrl + targetUrl);
+                // 依次尝试不同的代理服务器
+                for (const proxyUrl of proxyServers) {
+                    try {
+                        const targetUrl = encodeURIComponent('https://v.youku.com/v_show/id_XNjQ4NDA3MTk3Ng==.html?spm=a2hkm.8166622.PhoneSokuProgram_1.dtitle&s=beecc45b903b4ea9b19a');
+                        const response = await fetch(proxyUrl + targetUrl);
 
-                if (!response.ok) {
-                    throw new Error(`HTTP错误! 状态: ${response.status}`);
+                        if (response.ok) {
+                            html = await response.text();
+                            success = true;
+                            console.log(`成功使用代理: ${proxyUrl}`);
+                            break;
+                        }
+                    } catch (proxyError) {
+                        console.log(`代理 ${proxyUrl} 失败，尝试下一个代理`);
+                        continue;
+                    }
                 }
 
-                const html = await response.text();
+                if (!success) {
+                    throw new Error('所有代理服务器都不可用');
+                }
 
                 // 提取热度数据 (从<span class="new-title-heat">1450</span>中提取)
                 const heatMatch = html.match(/<span[^>]*class="new-title-heat"[^>]*>(\d+)<\/span>/);
@@ -490,7 +529,6 @@
                 refreshBtn.disabled = false;
             }
         }
-
 
 
 
