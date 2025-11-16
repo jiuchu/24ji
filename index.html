@@ -618,16 +618,17 @@ async function fetchWeiboIndexData() {
 
         // 添加刷新按钮事件监听
         refreshBtn.addEventListener('click', fetchReservationData);
+        refreshBtn.addEventListener('click', fetchWeiboIndexData);
 
-        // 每5秒自动刷新一次预约数据
+        // 每2分钟自动刷新一次预约数据
         setInterval(fetchReservationData, 120 * 1 * 1000);
         // 每5秒自动刷新一次热度数据
         //setInterval(fetchHeatData, 5 * 1 * 1000);
 
         // 每秒更新一次倒计时
         //setInterval(updateCountdown, 1000);
-// 每5分钟自动刷新一次微博指数数据
-setInterval(fetchWeiboIndexData, 5 * 60 * 1000);
+// 每1分钟自动刷新一次微博指数数据
+setInterval(fetchWeiboIndexData, 1* 60 * 1000);
 
     });
 </script>
