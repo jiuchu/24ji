@@ -282,6 +282,14 @@
                 <span class="info-label">热度：</span>
                 <span class="heat-value" id="heatValue">--</span>
             </div>
+            <div class="info-item">
+                <div class="info-item">
+    <span class="info-label ">微博指数：</span>
+<span id="weiboIndexValue" style="color: #ff6b6b;">--</span></div>
+
+
+
+</div>
             <!-- 在 info-section 内添加更新信息部分 -->
 <!--            <div class="info-item">-->
 <!--                <span class="info-label">更新时间：</span>-->
@@ -436,9 +444,6 @@
         }
 
 
-
-
-
 // 从HTML中提取并设置预约标题
         function setPublishTime(html) {
             const publishTimeElement = document.getElementById('start_update_time');
@@ -454,6 +459,33 @@
         }
 
 
+// 获取微博指数数据
+async function fetchWeiboIndexData() {
+    const weiboIndexElement = document.getElementById('weiboIndexValue');
+
+    try {
+        const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
+        const targetUrl = encodeURIComponent('https://rprank.tv.weibo.cn/episode/api/detail?current_uid=2136166244&pid=3000&sign=4a179f7cfb582de4630a228d0017c92c82358f15&program_type=0&ts=1763282422&c=applet&gsid=_2A25EHO_xDeRxGeRP6FQQ9ijOzziIHXVkiGQ5rDV6PUJbkdAbLUr3kWpNUCimGn5NW5S8nmOlxWq3tcul_4Q0Xgo7');
+
+        const response = await fetch(proxyUrl + targetUrl);
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.code === 1000 && data.data && data.data.program) {
+                // 提取微博指数数据
+                const weiboScore = data.data.program.score;
+                weiboIndexElement.textContent = weiboScore;
+            } else {
+                throw new Error('Invalid data format');
+            }
+        } else {
+            throw new Error('Failed to fetch Weibo index data');
+        }
+    } catch (error) {
+        console.error('Error fetching Weibo index data:', error);
+        weiboIndexElement.textContent = '--';
+    }
+}
 
 
 
@@ -579,6 +611,7 @@
         // 页面加载时获取数据
         fetchReservationData();
         fetchHeatData();
+        fetchWeiboIndexData(); // 添加这一行
 
         // 初始化倒计时
         // updateCountdown();
@@ -587,12 +620,14 @@
         refreshBtn.addEventListener('click', fetchReservationData);
 
         // 每5秒自动刷新一次预约数据
-        setInterval(fetchReservationData, 180 * 1 * 1000);
+        setInterval(fetchReservationData, 120 * 1 * 1000);
         // 每5秒自动刷新一次热度数据
         //setInterval(fetchHeatData, 5 * 1 * 1000);
 
         // 每秒更新一次倒计时
         //setInterval(updateCountdown, 1000);
+// 每5分钟自动刷新一次微博指数数据
+setInterval(fetchWeiboIndexData, 5 * 60 * 1000);
 
     });
 </script>
